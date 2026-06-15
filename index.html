@@ -8,146 +8,103 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="태우♡소헌">
-<link rel="manifest" href="manifest.json?v=3">
-<link rel="apple-touch-icon" href="icons/icon-192.png?v=3">
+<link rel="manifest" href="manifest.json?v=4">
+<link rel="apple-touch-icon" href="icons/icon-192.png?v=4">
 <title>태우♡소헌 가계부</title>
 <style>
+/* CSS 변수 및 기본 설정 */
 :root {
-  --bg: #f5f5f3;
-  --surface: #ffffff;
-  --surface2: #f0efed;
-  --text: #1a1a1a;
-  --text2: #6b6b68;
-  --text3: #a8a8a5;
-  --border: rgba(0,0,0,0.08);
-  --border2: rgba(0,0,0,0.14);
-  --income: #0a7c5c;
-  --income-bg: #e8f7f2;
-  --expense: #c0392b;
-  --expense-bg: #fdf0ef;
-  --saving: #2563a8;
-  --saving-bg: #eff5fd;
-  --debt: #9c3a12;
-  --debt-bg: #fdf3ee;
-  --accent: #1a1a1a;
-  --radius: 16px;
-  --radius-sm: 10px;
+  --bg: #f5f5f3; --surface: #ffffff; --surface2: #f0efed;
+  --text: #1a1a1a; --text2: #6b6b68; --text3: #a8a8a5;
+  --border: rgba(0,0,0,0.08); --border2: rgba(0,0,0,0.14);
+  --income: #0a7c5c; --expense: #c0392b; --saving: #2563a8; --debt: #9c3a12;
+  --accent: #1a1a1a; --radius: 16px; --radius-sm: 10px;
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
 }
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #111110;
-    --surface: #1c1c1a;
-    --surface2: #252523;
-    --text: #f0efed;
-    --text2: #a8a8a5;
-    --text3: #6b6b68;
-    --border: rgba(255,255,255,0.08);
-    --border2: rgba(255,255,255,0.14);
-    --income-bg: #0a2e24;
-    --expense-bg: #2e100e;
-    --saving-bg: #0d1e35;
-    --debt-bg: #2e1508;
+    --bg: #111110; --surface: #1c1c1a; --surface2: #252523;
+    --text: #f0efed; --text2: #a8a8a5; --text3: #6b6b68;
+    --border: rgba(255,255,255,0.08); --border2: rgba(255,255,255,0.14);
   }
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',sans-serif;font-size:16px;-webkit-font-smoothing:antialiased}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',sans-serif;font-size:16px;}
 .app{height:100%;display:flex;flex-direction:column;max-width:430px;margin:0 auto}
 
+/* 헤더 및 요약 */
 .header{background:var(--accent);padding: calc(var(--safe-top) + 14px) 20px 18px;flex-shrink:0;}
 .header-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
-.header-title{color:#fff;font-size:15px;font-weight:600;letter-spacing:0.02em}
+.header-title{color:#fff;font-size:15px;font-weight:600;display:flex;align-items:center;gap:8px;}
+.settings-btn {background:rgba(255,255,255,0.15);border:none;color:#fff;border-radius:8px;padding:4px 8px;font-size:12px;cursor:pointer;}
 .month-nav{display:flex;align-items:center;gap:14px}
-.month-btn{background:rgba(255,255,255,0.15);border:none;color:#fff;width:32px;height:32px;border-radius:50%;font-size:17px;cursor:pointer;display:flex;align-items:center;justify-content:center;-webkit-appearance:none}
-.month-btn:active{background:rgba(255,255,255,0.3)}
+.month-btn{background:rgba(255,255,255,0.15);border:none;color:#fff;width:32px;height:32px;border-radius:50%;font-size:17px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
 .month-label{color:#fff;font-size:16px;font-weight:600;min-width:80px;text-align:center}
 .summary-row{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px}
 .sum-card{background:rgba(255,255,255,0.1);border-radius:12px;padding:10px 12px}
 .sum-label{font-size:11px;color:rgba(255,255,255,0.6);margin-bottom:3px;font-weight:500}
 .sum-val{font-size:14px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.sum-val.pos{color:#6ee7c3}
-.sum-val.neg{color:#f9a8a8}
+.sum-val.pos{color:#6ee7c3} .sum-val.neg{color:#f9a8a8}
 
-.chart-wrap{background:var(--surface);border-bottom:1px solid var(--border);padding:14px 20px;flex-shrink:0}
-.bar-row{display:flex;align-items:center;gap:8px;margin-bottom:5px}
-.bar-row:last-child{margin-bottom:0}
-.bar-lbl{font-size:11px;color:var(--text2);width:46px;text-align:right;flex-shrink:0}
-.bar-track{flex:1;height:7px;background:var(--surface2);border-radius:20px;overflow:hidden}
-.bar-fill{height:100%;border-radius:20px;transition:width 0.35s ease}
-.bar-amt{font-size:11px;color:var(--text2);width:62px;text-align:right;flex-shrink:0}
-
-.tabs{display:flex;overflow-x:auto;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0;scrollbar-width:none}
-.tabs::-webkit-scrollbar{display:none}
-.tab{flex-shrink:0;padding:11px 14px;font-size:13px;font-weight:500;color:var(--text3);border:none;background:none;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap}
+/* 탭 및 리스트 */
+.tabs{display:flex;overflow-x:auto;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0;}
+.tab{flex:1;padding:11px 0;text-align:center;font-size:13px;font-weight:500;color:var(--text3);border:none;background:none;cursor:pointer;border-bottom:2px solid transparent;}
 .tab.active{color:var(--text);border-bottom-color:var(--text)}
-
-.list-wrap{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:calc(80px + var(--safe-bottom))}
-.date-group{padding:8px 20px 4px;font-size:12px;font-weight:600;color:var(--text3);letter-spacing:0.04em;text-transform:uppercase}
+.list-wrap{flex:1;overflow-y:auto;padding-bottom:calc(80px + var(--safe-bottom))}
+.date-group{padding:12px 20px 4px;font-size:12px;font-weight:600;color:var(--text3);}
 .entry{display:flex;align-items:center;gap:12px;padding:12px 20px;background:var(--surface);border-bottom:1px solid var(--border)}
-.entry:active{background:var(--surface2)}
-.entry-icon{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0}
+.entry-icon{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:19px;background:var(--surface2)}
 .entry-body{flex:1;min-width:0}
-.entry-name{font-size:15px;font-weight:500;color:var(--text);margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.entry-name{font-size:15px;font-weight:500;margin-bottom:2px;}
 .entry-sub{font-size:12px;color:var(--text3)}
-.entry-right{text-align:right;flex-shrink:0}
+.entry-right{text-align:right;}
 .entry-amt{font-size:15px;font-weight:600}
 .entry-del{background:none;border:none;color:var(--text3);padding:4px;font-size:18px;cursor:pointer;margin-left:6px}
 
-.fab{position:fixed;bottom:calc(20px + var(--safe-bottom));right:24px;width:58px;height:58px;border-radius:50%;background:var(--accent);color:#fff;font-size:28px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(0,0,0,0.25);z-index:50}
-.fab:active{transform:scale(0.94)}
-
+/* 플로팅 버튼 & 시트 */
+.fab{position:fixed;bottom:calc(20px + var(--safe-bottom));right:24px;width:58px;height:58px;border-radius:50%;background:var(--accent);color:#fff;font-size:28px;border:none;cursor:pointer;box-shadow:0 4px 20px rgba(0,0,0,0.25);z-index:50}
 .sheet-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:100}
 .sheet-bg.open{display:block}
-.sheet{position:fixed;bottom:0;left:0;right:0;max-width:430px;margin:0 auto;background:var(--surface);border-radius:24px 24px 0 0;padding:0 0 calc(20px + var(--safe-bottom));z-index:101;transform:translateY(100%);transition:transform 0.3s cubic-bezier(0.32,0.72,0,1)}
+.sheet{position:fixed;bottom:0;left:0;right:0;max-width:430px;margin:0 auto;background:var(--surface);border-radius:24px 24px 0 0;padding:0 0 calc(20px + var(--safe-bottom));z-index:101;transform:translateY(100%);transition:transform 0.3s;}
 .sheet.open{transform:translateY(0)}
-.sheet-handle{width:36px;height:4px;background:var(--border2);border-radius:4px;margin:12px auto 0}
-.sheet-header{display:flex;align-items:center;justify-content:space-between;padding:14px 20px 10px}
+.sheet-header{display:flex;align-items:center;justify-content:space-between;padding:14px 20px}
 .sheet-title{font-size:18px;font-weight:700}
-.sheet-close{background:var(--surface2);border:none;color:var(--text2);width:30px;height:30px;border-radius:50%;font-size:17px;cursor:pointer;display:flex;align-items:center;justify-content:center}
-.form-scroll{padding:0 20px;max-height:65vh;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.sheet-close{background:var(--surface2);border:none;width:30px;height:30px;border-radius:50%;font-size:17px;}
+.form-scroll{padding:0 20px;max-height:65vh;overflow-y:auto;}
 .form-group{margin-bottom:16px}
-.form-label{font-size:13px;font-weight:600;color:var(--text2);margin-bottom:6px;display:block;letter-spacing:0.02em}
-.seg{display:grid;gap:6px;margin-bottom:4px}
-.seg-5{grid-template-columns:repeat(5,1fr)}
-.seg-btn{padding:9px 4px;font-size:12px;font-weight:600;border:1.5px solid var(--border2);border-radius:var(--radius-sm);background:var(--surface);color:var(--text2);cursor:pointer;text-align:center;transition:all 0.15s}
-.seg-btn.sel{color:#fff;border-color:transparent}
-.seg-income.sel{background:var(--income)}
-.seg-fixed.sel{background:var(--saving)}
-.seg-variable.sel{background:#7c5c0a}
-.seg-saving.sel{background:#4a2a8c}
-.seg-debt.sel{background:var(--debt)}
-.sub-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
-.chip{padding:6px 12px;font-size:13px;border:1.5px solid var(--border2);border-radius:20px;background:var(--surface);color:var(--text2);cursor:pointer;font-weight:500;transition:all 0.15s}
-.chip.sel{background:var(--text);color:var(--surface);border-color:var(--text)}
-.form-input{width:100%;padding:13px 14px;font-size:16px;border:1.5px solid var(--border2);border-radius:var(--radius-sm);background:var(--surface);color:var(--text);outline:none;-webkit-appearance:none;appearance:none}
-.form-input:focus{border-color:var(--text)}
-.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.save-btn{margin:16px 20px 0;width:calc(100% - 40px);padding:16px;background:var(--accent);color:#fff;font-size:16px;font-weight:700;border:none;border-radius:var(--radius);cursor:pointer;letter-spacing:0.02em}
-.save-btn:active{opacity:0.85}
+.form-label{font-size:13px;font-weight:600;color:var(--text2);margin-bottom:6px;display:block;}
+.form-input{width:100%;padding:13px 14px;font-size:16px;border:1.5px solid var(--border2);border-radius:var(--radius-sm);background:var(--surface);color:var(--text);outline:none;}
+.save-btn{margin:16px 20px 0;width:calc(100% - 40px);padding:16px;background:var(--accent);color:#fff;font-size:16px;font-weight:700;border:none;border-radius:var(--radius);}
 
-.lock-screen{position:fixed;inset:0;background:var(--accent);z-index:200;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px calc(40px + var(--safe-bottom))}
+.type-btn-group {display: flex; gap: 8px; margin-bottom: 12px;}
+.type-btn {flex:1; padding:10px; border:1px solid var(--border2); border-radius:8px; background:none; color:var(--text); cursor:pointer;}
+.type-btn.active.income {background:var(--income); color:#fff; border-color:var(--income);}
+.type-btn.active.expense {background:var(--expense); color:#fff; border-color:var(--expense);}
+
+/* 잠금화면 (PWA 수정됨) */
+.lock-screen{position:fixed;inset:0;background:var(--accent);z-index:200;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px}
 .lock-screen.hidden{display:none}
 .lock-logo{font-size:48px;margin-bottom:12px}
 .lock-title{color:#fff;font-size:22px;font-weight:700;margin-bottom:6px}
-.lock-sub{color:rgba(255,255,255,0.5);font-size:14px;margin-bottom:32px;text-align:center}
-.pin-fallback{display:flex;flex-direction:column;align-items:center;width:100%}
+.lock-sub{color:rgba(255,255,255,0.7);font-size:15px;margin-bottom:32px;text-align:center;font-weight:500;}
 .pin-dots{display:flex;gap:14px;margin-bottom:32px}
-.pin-dot{width:14px;height:14px;border-radius:50%;background:rgba(255,255,255,0.25);transition:background 0.15s}
+.pin-dot{width:14px;height:14px;border-radius:50%;background:rgba(255,255,255,0.25);}
 .pin-dot.filled{background:#fff}
 .pin-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;width:240px}
-.pin-key{height:64px;border-radius:16px;background:rgba(255,255,255,0.1);border:none;color:#fff;font-size:22px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.1s}
-.pin-key:active{background:rgba(255,255,255,0.25)}
-.pin-key.del{font-size:18px}
-.pin-key.empty{background:transparent;border:none;cursor:default}
-.lock-err{color:#f9a8a8;font-size:13px;margin-top:12px;min-height:18px;text-align:center}
+.pin-key{height:64px;border-radius:16px;background:rgba(255,255,255,0.1);border:none;color:#fff;font-size:22px;font-weight:500;}
+.pin-key.empty{background:transparent;}
+.lock-err{color:#f9a8a8;font-size:13px;margin-top:12px;min-height:18px;}
+
+/* 비어있을 때 */
+.empty-state {text-align:center; padding:40px 20px; color:var(--text3); font-size:14px;}
 </style>
 </head>
 <body>
 <div class="app">
   <div class="header">
     <div class="header-top">
-      <div class="header-title">💑 태우♡소헌</div>
+      <div class="header-title">💑 태우♡소헌 <button class="settings-btn" onclick="backupData()">데이터 백업</button></div>
       <div class="month-nav">
         <button class="month-btn" onclick="changeMonth(-1)">‹</button>
         <div class="month-label" id="monthLabel"></div>
@@ -161,137 +118,347 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
       <div class="sum-card"><div class="sum-label">잔액</div><div class="sum-val" id="sBalance">₩0</div></div>
     </div>
   </div>
-  <div class="chart-wrap" id="chartWrap"></div>
+  
   <div class="tabs" id="tabs">
-    <button class="tab active" onclick="setTab('all',this)">전체</button>
-    <button class="tab" onclick="setTab('income',this)">수입</button>
-    <button class="tab" onclick="setTab('fixed',this)">고정</button>
-    <button class="tab" onclick="setTab('variable',this)">변동</button>
-    <button class="tab" onclick="setTab('saving',this)">저축</button>
-    <button class="tab" onclick="setTab('debt',this)">부채</button>
+    <button class="tab active" onclick="setFilter('all', this)">전체</button>
+    <button class="tab" onclick="setFilter('income', this)">수입</button>
+    <button class="tab" onclick="setFilter('expense', this)">지출</button>
   </div>
+  
   <div class="list-wrap" id="listWrap"></div>
 </div>
-<button class="fab" onclick="openSheet()" aria-label="항목 추가">+</button>
+
+<button class="fab" onclick="openSheet()">+</button>
+
 <div class="sheet-bg" id="sheetBg" onclick="closeSheet()"></div>
 <div class="sheet" id="sheet">
-  <div class="sheet-handle"></div>
-  <div class="sheet-header"><div class="sheet-title">항목 추가</div><button class="sheet-close" onclick="closeSheet()">✕</button></div>
+  <div class="sheet-header"><div class="sheet-title">내역 추가</div><button class="sheet-close" onclick="closeSheet()">✕</button></div>
   <div class="form-scroll">
-    <div class="form-group"><label class="form-label">대분류</label><div class="seg seg-5" id="catSeg">
-      <button class="seg-btn seg-income sel" onclick="selectCat('income',this)">수입</button>
-      <button class="seg-btn seg-fixed" onclick="selectCat('fixed',this)">고정</button>
-      <button class="seg-btn seg-variable" onclick="selectCat('variable',this)">변동</button>
-      <button class="seg-btn seg-saving" onclick="selectCat('saving',this)">저축</button>
-      <button class="seg-btn seg-debt" onclick="selectCat('debt',this)">부채</button>
-    </div></div>
-    <div class="form-group"><label class="form-label">중분류</label><div class="sub-chips" id="subChips"></div></div>
-    <div class="form-group"><label class="form-label">항목명</label><input class="form-input" id="fName" type="text" placeholder="예: 월급, 마트 장보기" autocomplete="off"></div>
-    <div class="form-row">
-      <div class="form-group"><label class="form-label">금액 (원)</label><input class="form-input" id="fAmount" type="number" inputmode="numeric" placeholder="0" min="0"></div>
-      <div class="form-group"><label class="form-label">날짜</label><input class="form-input" id="fDate" type="date"></div>
+    <div class="type-btn-group">
+      <button class="type-btn active income" id="btnTypeInc" onclick="setType('income')">수입</button>
+      <button class="type-btn" id="btnTypeExp" onclick="setType('expense')">지출</button>
     </div>
-    <div class="form-group"><label class="form-label">메모 (선택)</label><input class="form-input" id="fMemo" type="text" placeholder="간단한 메모"></div>
+    <div class="form-group"><label class="form-label">항목명</label><input class="form-input" id="fName" type="text" placeholder="예: 식비, 월급"></div>
+    <div class="form-group"><label class="form-label">금액 (원)</label><input class="form-input" id="fAmount" type="number" placeholder="0"></div>
+    <div class="form-group"><label class="form-label">날짜</label><input class="form-input" id="fDate" type="date"></div>
   </div>
   <button class="save-btn" onclick="saveEntry()">저장하기</button>
 </div>
+
 <div class="lock-screen" id="lockScreen">
   <div class="lock-logo">💑</div>
   <div class="lock-title">태우♡소헌 가계부</div>
   <div class="lock-sub" id="lockSub">PIN을 입력해 주세요</div>
-  <div class="pin-fallback" id="pinFallback">
-    <div class="pin-dots" id="pinDots"><div class="pin-dot" id="d0"></div><div class="pin-dot" id="d1"></div><div class="pin-dot" id="d2"></div><div class="pin-dot" id="d3"></div></div>
-    <div class="pin-grid">
-      <button class="pin-key" onclick="pinInput('1')">1</button><button class="pin-key" onclick="pinInput('2')">2</button><button class="pin-key" onclick="pinInput('3')">3</button>
-      <button class="pin-key" onclick="pinInput('4')">4</button><button class="pin-key" onclick="pinInput('5')">5</button><button class="pin-key" onclick="pinInput('6')">6</button>
-      <button class="pin-key" onclick="pinInput('7')">7</button><button class="pin-key" onclick="pinInput('8')">8</button><button class="pin-key" onclick="pinInput('9')">9</button>
-      <button class="pin-key empty"></button><button class="pin-key" onclick="pinInput('0')">0</button><button class="pin-key del" onclick="pinDelete()">⌫</button>
-    </div>
-    <div class="lock-err" id="pinErr"></div>
+  <div class="pin-dots" id="pinDots"><div class="pin-dot" id="d0"></div><div class="pin-dot" id="d1"></div><div class="pin-dot" id="d2"></div><div class="pin-dot" id="d3"></div></div>
+  <div class="pin-grid">
+    <button class="pin-key" onclick="pinInput('1')">1</button><button class="pin-key" onclick="pinInput('2')">2</button><button class="pin-key" onclick="pinInput('3')">3</button>
+    <button class="pin-key" onclick="pinInput('4')">4</button><button class="pin-key" onclick="pinInput('5')">5</button><button class="pin-key" onclick="pinInput('6')">6</button>
+    <button class="pin-key" onclick="pinInput('7')">7</button><button class="pin-key" onclick="pinInput('8')">8</button><button class="pin-key" onclick="pinInput('9')">9</button>
+    <button class="pin-key empty"></button><button class="pin-key" onclick="pinInput('0')">0</button><button class="pin-key del" onclick="pinDelete()">⌫</button>
   </div>
+  <div class="lock-err" id="pinErr"></div>
 </div>
 
 <script>
-// 보안 환경이 아닐 경우를 대비한 간단한 해시 함수 (안정성 강화)
+/* =========================================
+   1. 보안 및 잠금화면 (PWA 오류 해결 완벽판)
+   ========================================= */
+const PIN_KEY = 'wg_pin_hash_v3';
+let pinBuffer = '';
+let authMode = 'check'; // 'check', 'setup1', 'setup2'
+let tempPin = '';
+
 function simpleHash(str) {
   let hash = 0;
-  for (let i = 0; i < str.length; i++) {
-    const char = str.charCodeAt(i);
-    hash = ((hash << 5) - hash) + char;
-    hash = hash & hash;
-  }
+  for (let i = 0; i < str.length; i++) { hash = ((hash << 5) - hash) + str.charCodeAt(i); hash = hash & hash; }
   return hash.toString(16);
 }
 
-const PIN_KEY='wg_pin_hash_v2';
-let pinBuffer='';
-
-function initAuth(){
-  const hasPin=!!localStorage.getItem(PIN_KEY);
-  if(!hasPin){
-    setTimeout(() => {
-      const pin1=prompt('처음 사용하시는군요!\n4자리 PIN을 설정해 주세요:');
-      if(!pin1||pin1.length<4){alert('PIN은 4자리 이상이어야 합니다.');location.reload();return;}
-      const pin2=prompt('PIN을 한 번 더 입력해 주세요:');
-      if(pin1!==pin2){alert('PIN이 일치하지 않습니다.');location.reload();return;}
-      localStorage.setItem(PIN_KEY, simpleHash(pin1));
-      unlock();
-    }, 500);
-  }
-}
-
-function pinInput(d){
-  if(pinBuffer.length>=4)return;
-  pinBuffer+=d;
-  updateDots();
-  if(pinBuffer.length===4)setTimeout(checkPin,100);
-}
-
-function pinDelete(){
-  pinBuffer=pinBuffer.slice(0,-1);
-  updateDots();
-  document.getElementById('pinErr').textContent='';
-}
-
-function updateDots(){
-  for(let i=0;i<4;i++){
-    document.getElementById('d'+i).classList.toggle('filled',i<pinBuffer.length);
-  }
-}
-
-function checkPin(){
-  const hash = simpleHash(pinBuffer);
+function initAuth() {
   const stored = localStorage.getItem(PIN_KEY);
-  if(hash === stored){
-    unlock();
-  }else{
-    document.getElementById('pinErr').textContent='PIN이 틀렸습니다.';
-    pinBuffer='';
+  if (!stored) {
+    authMode = 'setup1';
+    document.getElementById('lockSub').textContent = '환영합니다! 새로운 4자리 PIN을 설정하세요.';
+  } else {
+    authMode = 'check';
+    document.getElementById('lockSub').textContent = 'PIN을 입력해 주세요';
+  }
+}
+
+function updateDots() {
+  for (let i = 0; i < 4; i++) {
+    document.getElementById('d'+i).classList.toggle('filled', i < pinBuffer.length);
+  }
+}
+
+function pinInput(d) {
+  if (pinBuffer.length >= 4) return;
+  pinBuffer += d;
+  updateDots();
+  document.getElementById('pinErr').textContent = '';
+  if (pinBuffer.length === 4) setTimeout(processPin, 150);
+}
+
+function pinDelete() {
+  pinBuffer = pinBuffer.slice(0, -1);
+  updateDots();
+}
+
+function processPin() {
+  if (authMode === 'setup1') {
+    tempPin = pinBuffer;
+    pinBuffer = '';
     updateDots();
+    authMode = 'setup2';
+    document.getElementById('lockSub').textContent = '확인을 위해 PIN을 한 번 더 입력하세요.';
+  } else if (authMode === 'setup2') {
+    if (tempPin === pinBuffer) {
+      localStorage.setItem(PIN_KEY, simpleHash(pinBuffer));
+      alert('비밀번호 설정 완료!');
+      unlock();
+    } else {
+      document.getElementById('pinErr').textContent = '처음 입력한 PIN과 다릅니다. 다시 설정하세요.';
+      authMode = 'setup1';
+      pinBuffer = ''; tempPin = '';
+      updateDots();
+      document.getElementById('lockSub').textContent = '새로운 4자리 PIN을 설정하세요.';
+    }
+  } else if (authMode === 'check') {
+    if (simpleHash(pinBuffer) === localStorage.getItem(PIN_KEY)) {
+      unlock();
+    } else {
+      document.getElementById('pinErr').textContent = 'PIN이 틀렸습니다.';
+      pinBuffer = '';
+      updateDots();
+    }
   }
 }
 
-function unlock(){
+function unlock() {
   document.getElementById('lockScreen').classList.add('hidden');
+  checkAutoSalary(); // 잠금 해제 시 급여 자동체크 실행!
 }
-
-document.addEventListener('visibilitychange',()=>{
-  if(document.hidden){
-    document.getElementById('lockScreen').classList.remove('hidden');
-    pinBuffer='';updateDots();
-    document.getElementById('pinErr').textContent='';
-  }
-});
 
 initAuth();
 
-// 가계부 로직 시작
-const SUBS={
-  income:['주수입','부수입','이자·배당','기타'],
-  fixed:['주거비','통신비','보험료','구독료','대출이자','기타'],
-  variable:['식비','외식·배달','교통','주유','쇼핑','경조사','의료','기타'],
-  saving:['정기적금','예금','주식·펀드','청약','연금','기타'],
-  debt:['신용대출','학자금','카드할부','기타']
-};
-const ICONS={income:'💵',fixed:'🏠',variable:'🛒',saving:'💙',debt:'💳'};const AMTCOL={income:'var(--income)',fixed:'var(--saving)',variable:'var(--text)',saving:'var(-
-(Content truncated due to size limit. Use line ranges to read remaining content)
+/* =========================================
+   2. 가계부 핵심 로직 및 캘린더 기능
+   ========================================= */
+let entries = JSON.parse(localStorage.getItem('wg_data') || '[]');
+let currentMonth = new Date(); // 항상 오늘 날짜 기준으로 시작
+let currentFilter = 'all';
+let formType = 'expense';
+
+// 통화 포맷
+const fmt = (num) => new Intl.NumberFormat('ko-KR').format(num);
+
+// 주말이면 평일(금요일)로 날짜 땡기기 함수
+function getAdjustedPayday(year, month, targetDate) {
+  let date = new Date(year, month - 1, targetDate);
+  // 0: 일요일, 6: 토요일
+  if (date.getDay() === 0) date.setDate(date.getDate() - 2); // 일요일 -> 금요일
+  if (date.getDay() === 6) date.setDate(date.getDate() - 1); // 토요일 -> 금요일
+  return date;
+}
+
+// 자동 급여 입력 (소헌: 21일, 태우: 25일)
+function checkAutoSalary() {
+  const AUTO_SALARY_AMOUNT = 0; // 👈 여기에 실제 월급 금액을 적으세요! (예: 3000000)
+  if (AUTO_SALARY_AMOUNT === 0) return; // 0원이면 작동 안함
+
+  let today = new Date();
+  let autoLogs = JSON.parse(localStorage.getItem('wg_auto_salary') || '{}');
+  let updated = false;
+
+  // 이번 달과 지난 달 두 달치 확인 (혹시 앱을 늦게 켰을까봐)
+  for (let i = 0; i < 2; i++) {
+    let checkDate = new Date(today.getFullYear(), today.getMonth() - i, 1);
+    let y = checkDate.getFullYear();
+    let m = checkDate.getMonth() + 1;
+
+    // 소헌 급여 (21일)
+    let sDay = getAdjustedPayday(y, m, 21);
+    if (today >= sDay) {
+      let key = `S-${y}-${m}`;
+      if (!autoLogs[key]) {
+        entries.push({
+          id: Date.now() + Math.random(),
+          type: 'income', name: '소헌 급여', amount: AUTO_SALARY_AMOUNT,
+          date: sDay.toISOString().split('T')[0]
+        });
+        autoLogs[key] = true; updated = true;
+      }
+    }
+
+    // 태우 급여 (25일)
+    let tDay = getAdjustedPayday(y, m, 25);
+    if (today >= tDay) {
+      let key = `T-${y}-${m}`;
+      if (!autoLogs[key]) {
+        entries.push({
+          id: Date.now() + Math.random(),
+          type: 'income', name: '태우 급여', amount: AUTO_SALARY_AMOUNT,
+          date: tDay.toISOString().split('T')[0]
+        });
+        autoLogs[key] = true; updated = true;
+      }
+    }
+  }
+
+  if (updated) {
+    localStorage.setItem('wg_auto_salary', JSON.stringify(autoLogs));
+    saveData();
+  }
+}
+
+function changeMonth(delta) {
+  currentMonth.setMonth(currentMonth.getMonth() + delta);
+  render();
+}
+
+function setFilter(type, el) {
+  currentFilter = type;
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  render();
+}
+
+function render() {
+  // 날짜 라벨 업데이트
+  document.getElementById('monthLabel').textContent = `${currentMonth.getFullYear()}년 ${currentMonth.getMonth() + 1}월`;
+
+  let y = currentMonth.getFullYear();
+  let m = currentMonth.getMonth() + 1;
+  let monthStr = `${y}-${m.toString().padStart(2, '0')}`;
+
+  let filtered = entries.filter(e => e.date.startsWith(monthStr));
+  if (currentFilter !== 'all') {
+    filtered = filtered.filter(e => e.type === currentFilter);
+  }
+
+  filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+  let inc = 0, exp = 0;
+  entries.filter(e => e.date.startsWith(monthStr)).forEach(e => {
+    if(e.type === 'income') inc += Number(e.amount);
+    if(e.type === 'expense') exp += Number(e.amount);
+  });
+
+  document.getElementById('sIncome').textContent = `₩${fmt(inc)}`;
+  document.getElementById('sExpense').textContent = `₩${fmt(exp)}`;
+  document.getElementById('sBalance').textContent = `₩${fmt(inc - exp)}`;
+
+  const wrap = document.getElementById('listWrap');
+  wrap.innerHTML = '';
+
+  if(filtered.length === 0) {
+    wrap.innerHTML = `<div class="empty-state">내역이 없습니다.</div>`;
+    return;
+  }
+
+  let lastDate = '';
+  filtered.forEach(e => {
+    if(e.date !== lastDate) {
+      // 요일 구하기
+      const dateObj = new Date(e.date);
+      const days = ['일','월','화','수','목','금','토'];
+      let dEl = document.createElement('div');
+      dEl.className = 'date-group';
+      dEl.textContent = `${e.date.split('-')[2]}일 (${days[dateObj.getDay()]})`;
+      wrap.appendChild(dEl);
+      lastDate = e.date;
+    }
+    let el = document.createElement('div');
+    el.className = 'entry';
+    let isInc = e.type === 'income';
+    el.innerHTML = `
+      <div class="entry-icon">${isInc ? '💵' : '🛒'}</div>
+      <div class="entry-body">
+        <div class="entry-name">${e.name}</div>
+      </div>
+      <div class="entry-right">
+        <div class="entry-amt" style="color:${isInc ? 'var(--income)' : 'var(--expense)'}">
+          ${isInc ? '+' : '-'}₩${fmt(e.amount)}
+        </div>
+      </div>
+      <button class="entry-del" onclick="deleteEntry(${e.id})">×</button>
+    `;
+    wrap.appendChild(el);
+  });
+}
+
+function saveData() {
+  localStorage.setItem('wg_data', JSON.stringify(entries));
+  render();
+}
+
+function deleteEntry(id) {
+  if(confirm('이 내역을 삭제할까요?')) {
+    entries = entries.filter(e => e.id !== id);
+    saveData();
+  }
+}
+
+/* =========================================
+   3. 입력 폼 & 바텀 시트 제어
+   ========================================= */
+function openSheet() {
+  document.getElementById('sheetBg').classList.add('open');
+  document.getElementById('sheet').classList.add('open');
+  // 기본 날짜를 오늘로 설정 (한국 시간 기준)
+  let today = new Date();
+  today.setMinutes(today.getMinutes() - today.getTimezoneOffset());
+  document.getElementById('fDate').value = today.toISOString().split('T')[0];
+  document.getElementById('fName').value = '';
+  document.getElementById('fAmount').value = '';
+}
+
+function closeSheet() {
+  document.getElementById('sheetBg').classList.remove('open');
+  document.getElementById('sheet').classList.remove('open');
+}
+
+function setType(t) {
+  formType = t;
+  document.getElementById('btnTypeInc').classList.remove('active');
+  document.getElementById('btnTypeExp').classList.remove('active');
+  if(t === 'income') document.getElementById('btnTypeInc').classList.add('active');
+  else document.getElementById('btnTypeExp').classList.add('active');
+}
+
+function saveEntry() {
+  let name = document.getElementById('fName').value.trim();
+  let amt = document.getElementById('fAmount').value;
+  let date = document.getElementById('fDate').value;
+  
+  if(!name || !amt || !date) { alert('모든 항목을 입력해주세요!'); return; }
+
+  entries.push({
+    id: Date.now(),
+    type: formType,
+    name: name,
+    amount: Number(amt),
+    date: date
+  });
+
+  saveData();
+  closeSheet();
+}
+
+/* 데이터 백업/복원 기능 */
+function backupData() {
+  const data = JSON.stringify(entries);
+  const blob = new Blob([data], {type: 'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `가계부_백업_${new Date().toISOString().split('T')[0]}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// 초기 실행
+render();
+</script>
+</body>
+</html>
