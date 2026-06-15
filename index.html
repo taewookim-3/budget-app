@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -291,11 +290,9 @@ async function sha256(str){
 async function initAuth(){
   const hasPin=!!localStorage.getItem(PIN_KEY);
   if(!hasPin){
-    // First launch: ask to set PIN
     await setupPin();
     return;
   }
-  // Check WebAuthn availability
   try{
     if(window.PublicKeyCredential&&await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable()){
       bioAvailable=true;
@@ -305,7 +302,6 @@ async function initAuth(){
       return;
     }
   }catch(e){}
-  // No biometrics — show PIN directly
   document.getElementById('lockSub').textContent='PIN을 입력해 주세요';
   document.getElementById('bioBtn').style.display='none';
   document.getElementById('bioLabel').style.display='none';
@@ -338,9 +334,6 @@ async function tryBiometric(){
     });
     unlock();
   }catch(e){
-    // WebAuthn not registered yet → fall back to platform authenticator via subtle approach
-    // Use a simpler approach: prompt device biometric via payment/conditional UI unavailable,
-    // so we use the best available: just show PIN with a friendly message
     btn.textContent='🔒';
     document.getElementById('bioLabel').textContent='인증 실패 — PIN으로 열어 주세요';
     showPinFallback();
@@ -387,7 +380,6 @@ function unlock(){
   document.getElementById('lockScreen').classList.add('hidden');
 }
 
-// Lock when page goes to background
 document.addEventListener('visibilitychange',()=>{
   if(document.hidden){
     document.getElementById('lockScreen').classList.remove('hidden');
@@ -413,7 +405,9 @@ const COLORS={income:'var(--income)',fixed:'var(--saving)',variable:'#9c6c0a',sa
 const AMTCOL={income:'var(--income)',fixed:'var(--saving)',variable:'var(--text)',saving:'var(--saving)',debt:'var(--expense)'};
 const BGCOL={income:'var(--income-bg)',fixed:'var(--saving-bg)',variable:'#fdf6e8',saving:'#f0eeff',debt:'var(--debt-bg)'};
 
-let curMonth=new Date().getMonth(),curYear=new Date().getFullYear(),curTab='all';
+// 현재 날짜 설정 (2026-06-15)
+const TODAY = new Date(2026, 5, 15); // Month is 0-indexed (5 = June)
+let curMonth=TODAY.getMonth(),curYear=TODAY.getFullYear(),curTab='all';
 let selectedCat='income',selectedSub='주수입';
 let entries=JSON.parse(localStorage.getItem('wg_entries')||'[]');
 
@@ -432,7 +426,10 @@ function changeMonth(d){
   render();
 }
 function monthEntries(){
-  return entries.filter(e=>{const d=new Date(e.date);return d.getMonth()===curMonth&&d.getFullYear()===curYear;});
+  return entries.filter(e=>{
+    const d=new Date(e.date + 'T00:00:00');
+    return d.getMonth()===curMonth&&d.getFullYear()===curYear;
+  });
 }
 function setTab(t,el){
   curTab=t;
@@ -476,7 +473,7 @@ function render(){
 
 function renderList(){
   const me=monthEntries();
-  const filtered=(curTab==='all'?me:me.filter(e=>e.cat===curTab)).sort((a,b)=>new Date(b.date)-new Date(a.date));
+  const filtered=(curTab==='all'?me:me.filter(e=>e.cat===curTab)).sort((a,b)=>new Date(b.date + 'T00:00:00')-new Date(a.date + 'T00:00:00'));
   const wrap=document.getElementById('listWrap');
   if(!filtered.length){
     wrap.innerHTML='<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-msg">아직 항목이 없어요<br>+ 버튼으로 추가해 보세요</div></div>';
@@ -513,7 +510,8 @@ function delEntry(id){
 }
 
 function openSheet(){
-  document.getElementById('fDate').value=new Date().toISOString().split('T')[0];
+  const todayStr = TODAY.toISOString().split('T')[0];
+  document.getElementById('fDate').value=todayStr;
   document.getElementById('fName').value='';
   document.getElementById('fAmount').value='';
   document.getElementById('fMemo').value='';
@@ -567,19 +565,15 @@ renderSubChips();
 function seedDefaultData(){
   if(localStorage.getItem('wg_seeded')) return;
 
-  // 체증식 대출 납입금 계산 함수
-  // 대출: 2억6천6백, 4.15%, 40년(480개월), 2025-04-03 시작
   const PRINCIPAL = 266000000;
   const MONTHLY_RATE = 4.15 / 100 / 12;
   const TOTAL_MONTHS = 480;
-  const START_YEAR = 2025, START_MONTH = 3; // 0-indexed: 4월=3
+  const START_YEAR = 2025, START_MONTH = 3;
   const TOTAL_RATIO = TOTAL_MONTHS * (TOTAL_MONTHS + 1) / 2;
 
   function getMortgagePayment(year, month){
-    // 몇 번째 납입인지 계산 (납입일: 매달 3일)
     const monthNum = (year - START_YEAR) * 12 + (month - START_MONTH);
     if(monthNum <= 0 || monthNum > TOTAL_MONTHS) return null;
-    // 잔여 원금
     let remaining = PRINCIPAL;
     for(let i = 1; i < monthNum; i++){
       remaining -= PRINCIPAL * i / TOTAL_RATIO;
@@ -589,22 +583,34 @@ function seedDefaultData(){
     return { principal: principalPart, interest: interestPart, total: principalPart + interestPart };
   }
 
-  const now = new Date();
-  const thisYear = now.getFullYear();
-  const thisMonth = now.getMonth(); // 0-indexed
+  // 주말/공휴일 고려한 지급일 계산 (간이 공휴일 포함)
+  function getAdjustedDate(year, month, day) {
+    let d = new Date(year, month, day);
+    // 주말(토:6, 일:0)이면 그 전날로 이동
+    while (d.getDay() === 0 || d.getDay() === 6) {
+      d.setDate(d.getDate() - 1);
+    }
+    // TODO: 실제 공휴일 API 연동이 없으므로 주말만 처리. 
+    // 필요시 특정 공휴일 리스트를 체크하여 d.setDate(d.getDate() - 1) 반복 가능
+    return d;
+  }
 
-  // 이번 달 날짜 기준으로 항목 추가
   const pad = n => String(n).padStart(2,'0');
-  const salaryDate = `${thisYear}-${pad(thisMonth+1)}-25`; // 월급일 25일
-  const debtDate = `${thisYear}-${pad(thisMonth+1)}-03`;  // 대출 납입일 3일
+  const fmtDate = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
 
-  const mortgage = getMortgagePayment(thisYear, thisMonth); // 0-indexed month
+  const thisYear = TODAY.getFullYear();
+  const thisMonth = TODAY.getMonth();
+
+  // 소헌: 21일, 태우: 25일 (주말이면 전날)
+  const shPayDate = fmtDate(getAdjustedDate(thisYear, thisMonth, 21));
+  const twPayDate = fmtDate(getAdjustedDate(thisYear, thisMonth, 25));
+  const debtDate = fmtDate(getAdjustedDate(thisYear, thisMonth, 3));
+
+  const mortgage = getMortgagePayment(thisYear, thisMonth);
 
   const defaults = [
-    // 태우 월급
-    { cat:'income', sub:'주수입', name:'태우 월급', amount:3100000, date:salaryDate, memo:'' },
-    // 소헌 월급
-    { cat:'income', sub:'주수입', name:'소헌 월급', amount:2800000, date:salaryDate, memo:'' },
+    { cat:'income', sub:'주수입', name:'태우 월급', amount:3100000, date:twPayDate, memo:'' },
+    { cat:'income', sub:'주수입', name:'소헌 월급', amount:2800000, date:shPayDate, memo:'' },
   ];
 
   if(mortgage){
