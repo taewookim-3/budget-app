@@ -7,10 +7,10 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="가계부">
+<meta name="apple-mobile-web-app-title" content="태우♡소헌">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
-<title>우리 가계부</title>
+<title>태우♡소헌 가계부</title>
 <style>
 :root {
   --bg: #f5f5f3;
@@ -166,7 +166,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 <div class="app">
   <div class="header">
     <div class="header-top">
-      <div class="header-title">💰 우리 가계부</div>
+      <div class="header-title">💑 태우♡소헌</div>
       <div class="month-nav">
         <button class="month-btn" onclick="changeMonth(-1)">‹</button>
         <div class="month-label" id="monthLabel"></div>
@@ -244,8 +244,8 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 
 <!-- Lock Screen -->
 <div class="lock-screen" id="lockScreen">
-  <div class="lock-logo">💰</div>
-  <div class="lock-title">우리 가계부</div>
+  <div class="lock-logo">💑</div>
+  <div class="lock-title">태우♡소헌 가계부</div>
   <div class="lock-sub" id="lockSub">지문 또는 얼굴로 잠금 해제</div>
   <button class="bio-btn" id="bioBtn" onclick="tryBiometric()" aria-label="생체 인증">🔒</button>
   <div class="bio-label" id="bioLabel">터치하여 인증</div>
@@ -561,6 +561,67 @@ if('serviceWorker' in navigator){
 }
 
 renderSubChips();
+
+// 초기 데이터 세팅 (최초 1회)
+function seedDefaultData(){
+  if(localStorage.getItem('wg_seeded')) return;
+
+  // 체증식 대출 납입금 계산 함수
+  // 대출: 2억6천6백, 4.15%, 40년(480개월), 2025-04-03 시작
+  const PRINCIPAL = 266000000;
+  const MONTHLY_RATE = 4.15 / 100 / 12;
+  const TOTAL_MONTHS = 480;
+  const START_YEAR = 2025, START_MONTH = 3; // 0-indexed: 4월=3
+  const TOTAL_RATIO = TOTAL_MONTHS * (TOTAL_MONTHS + 1) / 2;
+
+  function getMortgagePayment(year, month){
+    // 몇 번째 납입인지 계산 (납입일: 매달 3일)
+    const monthNum = (year - START_YEAR) * 12 + (month - START_MONTH);
+    if(monthNum <= 0 || monthNum > TOTAL_MONTHS) return null;
+    // 잔여 원금
+    let remaining = PRINCIPAL;
+    for(let i = 1; i < monthNum; i++){
+      remaining -= PRINCIPAL * i / TOTAL_RATIO;
+    }
+    const principalPart = Math.round(PRINCIPAL * monthNum / TOTAL_RATIO);
+    const interestPart = Math.round(remaining * MONTHLY_RATE);
+    return { principal: principalPart, interest: interestPart, total: principalPart + interestPart };
+  }
+
+  const now = new Date();
+  const thisYear = now.getFullYear();
+  const thisMonth = now.getMonth(); // 0-indexed
+
+  // 이번 달 날짜 기준으로 항목 추가
+  const pad = n => String(n).padStart(2,'0');
+  const salaryDate = `${thisYear}-${pad(thisMonth+1)}-25`; // 월급일 25일
+  const debtDate = `${thisYear}-${pad(thisMonth+1)}-03`;  // 대출 납입일 3일
+
+  const mortgage = getMortgagePayment(thisYear, thisMonth); // 0-indexed month
+
+  const defaults = [
+    // 태우 월급
+    { cat:'income', sub:'주수입', name:'태우 월급', amount:3100000, date:salaryDate, memo:'' },
+    // 소헌 월급
+    { cat:'income', sub:'주수입', name:'소헌 월급', amount:2800000, date:salaryDate, memo:'' },
+  ];
+
+  if(mortgage){
+    defaults.push(
+      { cat:'debt', sub:'신용대출', name:'주택대출 원금', amount:mortgage.principal, date:debtDate, memo:'체증식 40년' },
+      { cat:'fixed', sub:'대출이자', name:'주택대출 이자', amount:mortgage.interest, date:debtDate, memo:'4.15%' }
+    );
+  }
+
+  defaults.forEach(d => {
+    entries.push({ id: Date.now()+'_'+Math.random().toString(36).slice(2), ...d });
+  });
+
+  save();
+  localStorage.setItem('wg_seeded','1');
+}
+
+seedDefaultData();
 render();
 </script>
 </body>
